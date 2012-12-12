@@ -1,180 +1,76 @@
-
 <?php
+require './modelo/BBDD.inc';
 session_start();
-DEFINE("DB_HOST", "localhost");
-DEFINE("DB_USER", "root");
-DEFINE("DB_PASSWORD", "root1");
-DEFINE("DB_NAME", "proyecto");
-	$con = @mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-	if (!$con || !mysql_select_db("proyecto", $con))
-	{
-		die("Error conectando a la BD: " . mysql_error());
-	}
-?>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-   	<link rel="stylesheet" type="text/css" href="completa.css" title="style" />
-	<title>Lorem ipsum</title>
-</head>
-
-<body>
-<!-- Contenedor -->
-<div id="contenedor">
-
-	<!-- Cabecera -->
-	<div id="cabecera">
-		<div id="logo">
-			<h1><span>LOGOTIPO</span></h1>
-		</div>
-		<div id="buscador">
-	<?php
-
-if(@$_SESSION['user']==NULL && @$_SESSION['user']==""){
-
-if (isset($_POST['login']) === true && $_POST['user']!="" && $_POST['user']!=NULL)
-{
-	$user=$_POST['user'];
-	$pass=$_POST['pass'];
-	$sql = "select * from users where user like '".$user."' and pass like '".$pass."';";
-	$res = @mysql_query($sql, $con); 
-	$filas = mysql_num_rows($res);
-	
-	if($filas!=0 || $filas!=null)
-	{
-		
-		$usuario = mysql_result($res, 0, "user");
-   		$contrasena = mysql_result($res, 0, "pass");
-		
-		$_SESSION['user']=$usuario;
-		$_SESSION['pass']=$contrasena;
-		
-		
-		
-	
-	}
-	else
-	{
-	?>
-		
-		<form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">
-			<?php if (isset($_POST['login'])===TRUE){echo "<span style=\"color:red\">* User o pass incorrectos</span><br/>";} ?>
-			User <input type="text" name="user"/>
-			Pass <input type="password" name="pass"/>
-			<input type="submit" name="login" value="Login"></input><br/>
-			<a href="registro.php">Registrate</a>
-	</form>
-
-	<?php
-	}
+if (!isset($_SESSION['user'])){
+header('Location: vistas/index.php');
 }
-else
-{
-?>
+else{
+if ((empty($_POST))&&(empty($_GET))){
 
-<form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">
-			<?php if (isset($_POST['login'])===TRUE){echo "<span style=\"color:red\">* User o pass incorrectos</span><br/>";} ?>
-			User <input type="text" name="user"/>
-			Pass <input type="password" name="pass"/>
-			<input type="submit" name="login" value="Login"></input><br/>
-			<a href="registro.php">Registrate</a>
-			
-	</form>
+	include('vistas/cabecera.html');
+	include('vistas/menu_n.html');
+		if ($_SESSION['rol']==='admin'){
+			include('./Vistas/u_lateral.html');
+			echo "<p> Pulse la opcion deseada</p>";
+		}else{
+			echo "<aside></aside><section><p>Opciones no Disponibles para tu nivel de acceso</p></section>";
 
-	<?php
-	
-}
-}
+		}
 
-if(@$_SESSION['user']!=NULL && @$_SESSION['user']!=""){
-echo "Bienvenido ".$_SESSION['user'];
-echo "<br/><a href='logout.php'>Logout</a>";
+	include('vistas/PieHTML.html');
+}else{
+	//---------- GESTIONAMOS LAS PETICIONES
+	 if (isset($_GET) && !empty($_GET)){
+		$recogido=$_GET['SELECCIONADO'];
+				$id=$_GET['id'];
+				$idrol=$_GET['id3'];
+		if ($recogido=='alta'){
+			include ('Vistas/u_alta.html');
+		}else if ($recogido=='modificacion'){
+			include('./Vistas/u_modificacion.html');
+		}else if ($recogido=='baja'){
+			include('./Vistas/u_baja.html');
+		}else if ($recogido=='roles'){
+				//include('./Vistas/u_roles.html');	
+				echo "<p> OPCION NO DISPONIBLE</p>";
+		}else if ($recogido=='on'){
+					$donde=$_GET['donde'];
+					$filtre = $_GET['filtre'];
+					return Pintatabla($filtre,$donde);
+		}else if ($recogido=='alt'){
+				$pass=$_GET['id2'];
+				$email=$_GET['id4'];
+				return altaUser ($id,$pass,$idrol,$email);
+		}else if ($recogido=='mod'){
+				if ($id!=='admin'){
+					$pass=$_GET['id2'];
+					if($pass==""){
+						
+					}
+					return modiUser($id,$pass,$idrol);
+				}else{
+					return 'No se puede modificar<br>ese usuario';
+				}
+		}else if ($recogido=='baj'){
+				$pass=$_GET['id2'];
+				if ($id!=='admin'){
+					return bajaUser($id);
+				}else{
+					return 'No se puede dar de baja<br>ese usuario';
+				}
+		}else if ($recogido=='session'){
+			$user=$_SESSION['usuario'];
+			$rol=$_SESSION['rol'];
+			echo ($user."#".$rol);
+			//return $user."#".$rol;
+		}else if ($recogido=='destroy'){
+			session_start();
+			session_destroy();
+		}
+		
 
+	}
+ }
 }
 ?>
-		
-		
-		<div class="clear"></div>
-	</div>
-	<?php
-	if(@$_SESSION['user']!=NULL && @$_SESSION['user']!=""){?>
-	<div id="menu">
-		<ul id="menu_principal">
-			<li><a href="index.php">Inicio</a></li>
-			<li><a href="#">Mis tickets</a></li>
-			<li><a href="#">Mi cuenta</a></li>
-			<li><a href="ticket_nuevo.php">Nuevo Ticket</a></li>
-			<li><a href="logout.php">Logout</a></li>
-			<?php
-			//Opción de administrador si eres rank=1
-			$sql = "select rank from users where user like '".$_SESSION['user']."';";
-			$res = @mysql_query($sql, $con); 
-			$rank = mysql_result($res, 0, "rank");
-			if($rank==1)
-			{
-				echo "<li><a href='admin.php'>Administrador</a></li>";
-			}
-			?>
-		</ul>
-		<div class="clear"></div>
-	</div>
-	<?php
-		}
-	?>
-<div id="contenido">
-	
-	<!-- Principal -->
-	<div id="principal">
-		<?php
-		if(@$_SESSION['user']==NULL && @$_SESSION['user']==""){?>
-		<div class="articulo">
-			<h2>No estas logeado</h2>
-		</div>
-		<?php
-		}
-		else
-		{
-		?>
-		
-		<?php
-		}
-		?>
-		
-		
-	</div>
-	<!-- /Principal -->
-	
-		</div>
-</div>
-
-	
-	<!-- /Contenido -->
-	
-    <div class="clear"></div>
-	
-    <!-- Pie -->
-	<div id="pie">
-		<span class="enlaces">
-			<a href="#">Nulla</a> |
-			<a href="#">Pharetra</a> |
-			<a href="#">Luctus</a> |
-			<a href="#">Ipsum</a> |
-			<a href="#">Proin</a> |
-			<a href="#">Placerat</a>
-		</span>
-		
-		<span class="copyright">
-			&copy; Copyright Lorem ipsum
-		</span>
-		<div class="clear"></div>
-	</div>
-	<!-- /Pie -->
-</div>
-</div>
-<!-- /Contenedor -->
-
-</body>
-</html>
-
-
