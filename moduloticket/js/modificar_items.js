@@ -1,27 +1,32 @@
 addEvent(window,'load',inicializarEventos,false);
-//inicializo los eventos, y le pongo a pass, el onKeyUp event
 function inicializarEventos(){
-  var ob=document.getElementById('pass');
+  var ob=document.getElementById('buscar');
   addEvent(ob,'keyup',presionTecla,false);
+  var ob1=document.getElementById('radio1');
+  addEvent(ob1,'click',presionTecla,false);
+  var ob2=document.getElementById('radio2');
+  addEvent(ob2,'click',presionTecla,false);
+  var ob3=document.getElementById('criterio_ord');
+  addEvent(ob3,'change',presionTecla,false);
+  var ob4=document.getElementById('mas');
+  addEvent(ob4,'change',presionTecla,false);
 }
 var conexion1;
-//en esta función, digo que si apreto enter, que se realice la consulta a la BBDD
 function presionTecla(e){
-  if (window.event.keyCode==13){
   conexion1=crearXMLHttpRequest();
   conexion1.onreadystatechange = procesarEventos;
-  user=document.getElementById('user').value;
-  pass=document.getElementById('pass').value;
-  conexion1.open('GET','../modelo/login.php?user='+user+"&pass="+pass, true);
+  buscar=document.getElementById('buscar').value;
+  conexion1.open('GET','./moduloitems/modelos/modifica_items_ajax.php?text='+document.form3.buscar.value+"&radio1="+document.form3.radio1.checked+
+	"&radio2="+document.form3.radio2.checked+"&criterio_ord="+document.form3.criterio_ord.value+"&mas="+document.form3.mas.value, true);
   conexion1.send(null);
-  }
 }
-//lo que devuelve la BBDD, lo pinto en el cuerpo de la web
 function procesarEventos(){
-var resultados = document.getElementById("cuerpo");
+  var resultados = document.getElementById("resultado3");
   if(conexion1.readyState == 4){
     if (conexion1.status==200)
 	  resultados.innerHTML = conexion1.responseText;
+    else
+      alert(conexion1.statusText);
   } 
   else 
     resultados.innerHTML = '';
