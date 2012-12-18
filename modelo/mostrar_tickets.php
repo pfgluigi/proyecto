@@ -35,9 +35,9 @@
 <table cellpadding="0" cellspacing="0" border="0" class="display" id="tablatickets">
 	<thead>
 		<tr>
-			<th width="10%">Data</th>
-			<th width="30%">IP Source</th>
-			<th width="60%">Web destí</th>
+			<th>ID</th>
+			<th>Title</th>
+			<th>ID Usuario</th>
 			
 		</tr>
 	</thead>
@@ -48,9 +48,9 @@
 	</tbody>
 	<tfoot>
 		<tr>
-			<th>Data</th>
-			<th>IP Source</th>
-			<th>Web destí</th>			
+			<th>ID</th>
+			<th>Title</th>
+			<th>ID Usuario</th>		
 		</tr>
 	</tfoot>
 </table>

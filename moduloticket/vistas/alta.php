@@ -1,3 +1,4 @@
+<script type="text/javascript" src="js/imagenes.js"></script>
 <div id="ticket">
 					
 					<form action="index.php?controlador=ticket&accion=alta" method="POST">
